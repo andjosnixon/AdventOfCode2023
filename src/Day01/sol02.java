@@ -12,6 +12,7 @@ public class sol02 {
     }
 
     //Commenting from personal computer, just to test making changes on multiple computers
+    //Commenting from APL mac, just make test changes 
     public static void main(String[] args) {
         int output = 0;
         try {
