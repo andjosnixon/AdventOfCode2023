@@ -11,6 +11,7 @@ public class sol02 {
         return new String(a);
     }
 
+    //Commenting from personal computer, just to test making changes on multiple computers
     public static void main(String[] args) {
         int output = 0;
         try {
