@@ -25,20 +25,23 @@ public class sol01 {
             System.out.println("Error occurred.");
             e.printStackTrace();
         }
-        for (int i_lineCount = 0; i_lineCount < lineCount-2; i_lineCount++ ){
-            String[] stringIn = Arrays.copyOfRange(puzzle, i_lineCount, i_lineCount+2);
-            String[] stringOut1 = checkTopString(stringIn);
-            String[] stringOut2 = checkBottomString(stringOut1);
-            puzzle[i_lineCount] = stringOut2[0];
-            puzzle[i_lineCount+1] = stringOut2[1];
+
+        String[] firstTwo = Arrays.copyOfRange(puzzle, 0, 2);
+        String firstLineChecked = checkFirstTwoStrings(firstTwo);
+        puzzle[0] = firstLineChecked;
+
+        for (int i_lineCount = 1; i_lineCount < lineCount-1; i_lineCount++ ){
+            String[] stringsIn = Arrays.copyOfRange(puzzle, i_lineCount-1, i_lineCount+2);
+            String middleLineChecked = checkMiddleStrings(stringsIn);
+            puzzle[i_lineCount] = middleLineChecked;
         }
-        String[] stringIn = Arrays.copyOfRange(puzzle, lineCount-3, lineCount-1);
-        String[] stringOut = checkBottomString(stringIn);
-        puzzle[lineCount-2] = stringOut[0];
-        puzzle[lineCount-1] = stringOut[1];
+
+        String[] lastTwo = Arrays.copyOfRange(puzzle, lineCount-2, lineCount);
+        String lastLineChecked = checkLastTwoStrings(lastTwo);
+        puzzle[lineCount-1] = lastLineChecked;
 
         int total = 0;
-        for (int i_lines = 0; i_lines<lineCount-1; i_lines++){
+        for (int i_lines = 0; i_lines<lineCount; i_lines++){
             Pattern p_num = Pattern.compile( "\\d+");
             Matcher m_num = p_num.matcher(puzzle[i_lines]);
             while (m_num.find()) {
@@ -48,92 +51,133 @@ public class sol01 {
         System.out.println(total);
     }
 
-    // takes in two strings at a time
-    // check left/right/adjacent/down on the top string, check left/right on the bottom string
-    // if number is detected with no symbol nearby, set to A matching original size
-    // 5 becomes A, 24 becomes AA, 129 becomes AAA, etc.
-    // return the two strings
-    public static String[] checkTopString(String[] stringIn){
-        String[] output = new String[2];
-        int s1len = stringIn[0].length();
-        int s2len = stringIn[1].length();
+    // This method is use in lines 1 through end-1 (i.e. not the first or last lines)
+    // Always takes in three lines, searching for numbers that aren't valuable, changing them to "AAA"
+    // Checks up, down, left, right, adjacent
+    public static String checkMiddleStrings(String[] stringsIn){
+        String output;
+        int len = stringsIn[0].length(); // assumes all are the same length
         int clearFlag = 1;
-        char[] string1 = stringIn[0].toCharArray();
-        char[] string2 = stringIn[1].toCharArray();
+        char[] topString = stringsIn[0].toCharArray();
+        char[] middleString = stringsIn[1].toCharArray();
+        char[] bottomString = stringsIn[2].toCharArray();
+        Pattern p_middle = Pattern.compile( "\\d+");
+        Matcher m_middle = p_middle.matcher(stringsIn[1]); // pass in the middle string here
+        while (m_middle.find()) {
+            clearFlag = 1;
+            int first = m_middle.start();
+            int last = m_middle.end();
+            //check left and adjacent
+            if (first > 0){
+                if (Character.compare(topString[first-1], '.')!=0 || Character.compare(middleString[first-1], '.')!=0 || Character.compare(bottomString[first-1], '.')!=0){
+                    clearFlag = 0;
+                }
+            }
+            //check right and adjacent
+            if (last < len){
+                if (Character.compare(topString[last], '.')!=0 || Character.compare(middleString[last], '.')!=0 || Character.compare(bottomString[last], '.')!=0){
+                    clearFlag = 0;
+                }
+            }
+            //check above and below
+            String dots = ".".repeat(last - first);
+            String top_copy = new String(topString, first,(last - first));
+            String bottom_copy = new String(bottomString, first,(last - first));
+            if (!dots.equals(top_copy) || !dots.equals(bottom_copy)) {
+                clearFlag = 0;
+            }
+
+            if (clearFlag==1){
+                for (int i_replace = first; i_replace<last; i_replace++){
+                    middleString[i_replace] = 'A';
+                }
+            }
+        }
+        output = new String(middleString);
+        return output;
+    }
+
+    //Check first two strings
+    public static String checkFirstTwoStrings(String[] stringsIn){
+        String output;
+        int len = stringsIn[0].length(); // assumes all are the same length
+        int clearFlag = 1;
+        char[] topString = stringsIn[0].toCharArray();
+        char[] bottomString = stringsIn[1].toCharArray();
         Pattern p_top = Pattern.compile( "\\d+");
-        Matcher m_top = p_top.matcher(stringIn[0]);
+        Matcher m_top = p_top.matcher(stringsIn[0]); // pass in the middle string here
         while (m_top.find()) {
             clearFlag = 1;
             int first = m_top.start();
             int last = m_top.end();
             //check left and adjacent
             if (first > 0){
-                if (Character.compare(string1[first-1], '.')!=0 || Character.compare(string2[first-1], '.')!=0){
+                if (Character.compare(topString[first-1], '.')!=0 || Character.compare(bottomString[first-1], '.')!=0){
                     clearFlag = 0;
                 }
             }
             //check right and adjacent
-            if (last+1 < s1len){
-                if (Character.compare(string1[last+1], '.')!=0 || Character.compare(string2[last+1], '.')!=0){
+            if (last < len){
+                if (Character.compare(topString[last], '.')!=0 || Character.compare(bottomString[last], '.')!=0){
                     clearFlag = 0;
                 }
             }
             //check below
             String dots = ".".repeat(last - first);
-            String copy = new String(string2, first,(last - first));
-            if (!dots.equals(copy)) {
+            String bottom_copy = new String(bottomString, first,(last - first));
+            if (!dots.equals(bottom_copy)) {
                 clearFlag = 0;
             }
+
             if (clearFlag==1){
                 for (int i_replace = first; i_replace<last; i_replace++){
-                    string1[i_replace] = 'A';
+                    topString[i_replace] = 'A';
                 }
             }
         }
-        output[0] = new String(string1);
-        output[1] = new String(string2);
+        output = new String(topString);
         return output;
     }
 
-    public static String[] checkBottomString(String[] stringIn){
-        String[] output = new String[2];
-        int s1len = stringIn[0].length();
-        int s2len = stringIn[1].length();
+    //Check last two strings
+    public static String checkLastTwoStrings(String[] stringsIn){
+        String output;
+        int len = stringsIn[0].length(); // assumes all are the same length
         int clearFlag = 1;
-        char[] string1 = stringIn[0].toCharArray();
-        char[] string2 = stringIn[1].toCharArray();
+        char[] topString = stringsIn[0].toCharArray();
+        char[] bottomString = stringsIn[1].toCharArray();
         Pattern p_bottom = Pattern.compile( "\\d+");
-        Matcher m_bottom = p_bottom.matcher(stringIn[1]);
+        Matcher m_bottom = p_bottom.matcher(stringsIn[1]); // pass in the middle string here
         while (m_bottom.find()) {
+            clearFlag = 1;
             int first = m_bottom.start();
-            int last = m_bottom.end()-1;
+            int last = m_bottom.end();
             //check left and adjacent
             if (first > 0){
-                if (Character.compare(string1[first-1], '.')!=0 || Character.compare(string2[first-1], '.')!=0){
+                if (Character.compare(topString[first-1], '.')!=0){
                     clearFlag = 0;
                 }
             }
             //check right and adjacent
-            if (last+1 < s1len){
-                if (Character.compare(string1[last+1], '.')!=0 || Character.compare(string2[last+1], '.')!=0){
+            if (last < len){
+                if (Character.compare(topString[last], '.')!=0){
                     clearFlag = 0;
                 }
             }
             //check above
             String dots = ".".repeat(last - first);
-            String copy = new String(string1, first,(last-first));
-
-            if (!dots.equals(copy)) {
+            String top_copy = new String(topString, first,(last - first));
+            if (!dots.equals(top_copy)) {
                 clearFlag = 0;
             }
+
             if (clearFlag==1){
                 for (int i_replace = first; i_replace<last; i_replace++){
-                    string2[i_replace] = 'A';
+                    bottomString[i_replace] = 'A';
                 }
             }
         }
-        output[0] = new String(string1);
-        output[1] = new String(string2);
+        output = new String(bottomString);
         return output;
     }
 }
