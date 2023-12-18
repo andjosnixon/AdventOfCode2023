@@ -9,19 +9,22 @@ import java.util.regex.Matcher;
 
 //Guesses
 // 2298946 - too low
+// 9369740 - incorrect
+// 9425061
 
 
 
-public class sol02 {
+public class day04sol02 {
     public static void main(String[] args) {
         int numLines = 0;
         int numLineIndex = 0;
-        long[] reps = {1,1,1,1,1,1,1,1,1,1};
+        long[] reps = {1,1,1,1,1,1,1,1,1,1,1};
         int[][] myNums = new int[220][25];
         int[][] winning = new int[220][10];
         long totalScratchCards = 0;
         try {
-            File myObj = new File("C:/Users/andjo/Repo/AdventOfCode2023/src/Day04/input04.txt");
+            //File myObj = new File("C:/Users/andjo/Repo/AdventOfCode2023/src/Day04/input04.txt");
+            File myObj = new File("/Users/nixonaj1/AdventOfCode2023/src/Day04/input04.txt");
             Scanner myReader = new Scanner(myObj);
 
             while (myReader.hasNextLine()) {
@@ -54,7 +57,7 @@ public class sol02 {
         int thisLineMatches;
         for( int lineCount = 0; lineCount < numLines ; lineCount++){
             thisLineMatches = getMatches(myNums[lineCount], winning[lineCount]);
-            for ( int repCount =1; repCount < thisLineMatches; repCount++){
+            for ( int repCount =1; repCount < thisLineMatches+1; repCount++){
                 reps[repCount] = reps[repCount] + reps[0];
             }
             totalScratchCards = totalScratchCards + reps[0];
@@ -77,10 +80,10 @@ public class sol02 {
     }
 
     public static long[] shift(long[] reps){
-        for (int cnt = 1; cnt<10; cnt++){
+        for (int cnt = 1; cnt<11; cnt++){
             reps[cnt-1] = reps[cnt];
         }
-        reps[9] = 1;
+        reps[10] = 1;
         return reps;
     }
 }
