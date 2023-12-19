@@ -2,15 +2,15 @@ package Day05;
 
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
-import java.util.Arrays;
 import java.util.Scanner; // Import the Scanner class to read text files
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 //Guesses
-// 403695602, right on the first try!!!!
+// 0, but then discovered I did something wrong. Need to
+// 219529182, correct. Took a few minutes to run though.
 
-public class day05sol01 {
+public class day05sol02 {
     public static void main(String[] args) {
         long closestLocation = 1234567890L;
         String[] allLines = new String[200]; //183 line in the file
@@ -48,7 +48,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                seed_soil = addEmptyRow(seed_soil);
+                                seed_soil = addEmptyRow(seed_soil, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -71,7 +71,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                soil_fertilizer = addEmptyRow(soil_fertilizer);
+                                soil_fertilizer = addEmptyRow(soil_fertilizer, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -93,7 +93,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                fertilizer_water  = addEmptyRow(fertilizer_water );
+                                fertilizer_water  = addEmptyRow(fertilizer_water, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -116,7 +116,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                water_light  = addEmptyRow(water_light);
+                                water_light  = addEmptyRow(water_light, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -139,7 +139,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                light_temperature  = addEmptyRow(light_temperature );
+                                light_temperature  = addEmptyRow(light_temperature,3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -162,7 +162,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                temperature_humidity  = addEmptyRow(temperature_humidity );
+                                temperature_humidity  = addEmptyRow(temperature_humidity, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -184,7 +184,7 @@ public class day05sol01 {
                             break;
                         } else {
                             if (i_rowCounter > 0) {
-                                humidity_location  = addEmptyRow(humidity_location );
+                                humidity_location  = addEmptyRow(humidity_location, 3);
                             }
                             j_columnCounter = 0;
                             Pattern p = Pattern.compile("\\d+");
@@ -202,11 +202,16 @@ public class day05sol01 {
                     }
                 }
             }
-            for(int i_SeedCount = 0; i_SeedCount<seeds.length; i_SeedCount++){
-                long temp = getLocation(seeds[i_SeedCount], seed_soil, soil_fertilizer,
-                        fertilizer_water, water_light, light_temperature, temperature_humidity, humidity_location);
-                if (temp < closestLocation){
-                    closestLocation = temp;
+
+            for(int i_SeedCount = 0; i_SeedCount<seeds.length/2; i_SeedCount++){
+                long i_start = seeds[2*i_SeedCount];
+                long i_range = seeds[2*i_SeedCount+1];
+                for (long i_ManySeedCount = i_start; i_ManySeedCount < i_start+i_range; i_ManySeedCount++){
+                    long temp = getLocation(i_ManySeedCount, seed_soil, soil_fertilizer,
+                            fertilizer_water, water_light, light_temperature, temperature_humidity, humidity_location);
+                    if (temp < closestLocation){
+                        closestLocation = temp;
+                    }
                 }
             }
             System.out.println(closestLocation);
@@ -231,14 +236,14 @@ public class day05sol01 {
             return outputArray;
         }
     }
-    public static long[][] addEmptyRow( long[][] existingArray ){
-        long[][] outputArray = new long[existingArray.length+1][3];
+    public static long[][] addEmptyRow( long[][] existingArray , int width){
+        long[][] outputArray = new long[existingArray.length+1][width];
         for (int i_rowCounter = 0; i_rowCounter < outputArray.length-1; i_rowCounter++) {
-            for (int j_columnCounter = 0; j_columnCounter < 3; j_columnCounter++){
+            for (int j_columnCounter = 0; j_columnCounter < width; j_columnCounter++){
                 outputArray[i_rowCounter][j_columnCounter] = existingArray[i_rowCounter][j_columnCounter];
             }
         }
-        outputArray[outputArray.length-1] = new long[3];
+        outputArray[outputArray.length-1] = new long[width];
         return outputArray;
     }
 
@@ -256,14 +261,12 @@ public class day05sol01 {
     }
 
     public static long translateSourceToDestination(long a, long[][] b){
-        // start with seed to seed_soil
-        long next = 0;
+        long next = -1;
         for (int i_seedCount = 0; i_seedCount<b.length; i_seedCount++){
             if (a >= b[i_seedCount][1] && a <= b[i_seedCount][1] + b[i_seedCount][2]){
-                next = a + (b[i_seedCount][0] - b[i_seedCount][1]);
-                break;
+                return a + (b[i_seedCount][0] - b[i_seedCount][1]);
             }
         }
-        return next;
+        return a;
     }
 }
